@@ -33,8 +33,8 @@ For Fedora based systems:
 .. note::
 
     On Raspian, ``libjpeg-turbo8-dev`` is instead named
-    as ``libturbojpeg1-dev``.
-    
+    as ``libturbojpeg-dev``.
+
 .. note::
 
     On some older Linux systems, ``python-wxgtk3.0`` may be instead named
