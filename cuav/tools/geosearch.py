@@ -166,10 +166,18 @@ def process(args):
   mosaic = cuav_mosaic.Mosaic(slipmap, C=C_params,
                               camera_settings=camera_settings,
                               image_settings=image_settings,
+                              email_settings=email_settings,
                               start_menu=True,
                               classify=args.categories,
                               thumb_size=args.mosaic_thumbsize,
                               map_thumb_size=args.map_thumbsize)
+
+  email_settings = MPSettings(
+    [ MPSetting('SmtpServer', str, args.smtp_server, 'STMP Server Info'),
+      MPSetting('MailFormat', str, args.mail_format, 'Mail format')
+      ],
+    title='Email Settings'
+  )
 
   joelog = cuav_joe.JoeLog(None)
 
@@ -366,6 +374,8 @@ def parse_args():
   parser.add_argument("--gammalog", default=None, type=str, help="gamma.log from flight")
   parser.add_argument("--target", default=None, type=str, help="lat,lon,radius target")
   parser.add_argument("--categories", default=None, type=str, help="xml file containing categories for classification")
+  parser.add_argument("--smtp-server", default=None, type=str, help="[host]:[port]:[username]:[password]")
+  parser.add_argument("--mail-format", default=None, type=str, help="[To]:[From]:[Subject]:[Content GPS10/GPS60]")
   if 1 != len(sys.argv):
     parser.add_argument("--flag", default=[], type=str, action='append', help="flag positions"),
   parser.add_argument("--blue-emphasis", default=False, action='store_true', help="enable blue emphasis in scanner")
@@ -407,6 +417,8 @@ def parse_args_gooey():
   parser.add_argument("--gammalog", default=None, type=str, help="gamma.log from flight", widget='FileChooser')
   parser.add_argument("--target", default=None, type=str, help="lat,lon,radius target")
   parser.add_argument("--categories", default=None, type=str, help="xml file containing categories for classification", widget='FileChooser')
+  parser.add_argument("--smtp-server", default=None, type=str, help="[host]:[port]:[username]:[password]")
+  parser.add_argument("--mail-format", default=None, type=str, help="[To]:[From]:[Subject]:[Content GPS10/GPS60]")
   if 1 != len(sys.argv):
     parser.add_argument("--flag", default=[], type=str, action='append', help="flag positions"),
   parser.add_argument("--blue-emphasis", default=False, action='store_true', help="enable blue emphasis in scanner")

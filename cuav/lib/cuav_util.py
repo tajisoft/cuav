@@ -857,3 +857,56 @@ def gps_ddtodms(latlon):
     _latStr = '{0}°{1}\"{2}\'{3}'.format(dmsLatDeg, dmsLatMin, dmsLatSec, dmsLatHem)
     _longStr = '{0}°{1}\"{2}\'{3}'.format(dmsLongDeg, dmsLongMin, dmsLongSec, dmsLongHem)
     return (_latStr, _longStr)
+
+def send_mail(email_settings, img, latlon):
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.image import MIMEImage
+    from email.mime.multipart import MIMEMultipart
+
+    # smtp_server: [host]:[port]:[username]:[password]
+    mail_info = email_settings.SmtpServer.strip().split(':')
+    # mail_format: [To]:[From]:[Subject]:[Content]
+    mail_format = email_settings.MailFormat.strip().split(':')
+    if len(mail_format) < 4:
+        return
+    mail_with_gps = mail_format[3].replace("GPS10", "{0},{1}".format(latlon[0], latlon[1]))
+    dms60 = gps_ddtodms(latlon)
+    mail_with_gps = mail_with_gps.replace("GPS60", "{0},{1}".format(dms60[0], dms60[1]))
+    mail_with_gps = mail_with_gps.replace('//', '\n')
+    # create message
+    msg = MIMEMultipart()
+    msg['Subject'] = mail_format[2]
+    msg['From'] = mail_format[1]
+    msg['To'] = mail_format[0]
+    content = MIMEText(mail_with_gps, 'plain', 'utf-8')
+    msg.attach(content)
+    # attach image file
+    fp = open(img.filename, 'rb')
+    img_file = MIMEImage(fp.read())
+    fp.close()
+    msg.attach(img_file)
+    try:
+        # connect smtp server
+        server = smtplib.SMTP_SSL(mail_info[0])
+        if len(mail_info[1]) > 0:
+            server = smtplib.SMTP_SSL(mail_info[0], int(mail_info[1]))
+        else:
+            server = smtplib.SMTP_SSL(mail_info[0])
+
+        server.set_debuglevel(False)
+
+        server.ehlo()
+        # login
+        if mail_info[2] and mail_info[3]:
+            server.login(mail_info[2], mail_info[3])
+        # check TLS
+        if server.has_extn('STARTTLS'):
+            server.starttls()
+            server.ehlo()
+
+        server.login(mail_info[2], mail_info[3])
+        server.sendmail(mail_format[1], [mail_format[0]], msg.as_string())
+        print("Mail sent successfully!>{0},{1}".format(latlon[0], latlon[1]))
+    finally:
+        server.quit()

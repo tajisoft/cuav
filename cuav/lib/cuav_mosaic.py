@@ -95,6 +95,7 @@ class Mosaic():
                  C=None,
                  camera_settings = None,
                  image_settings = None,
+                 email_settings = None,
                  start_menu=False,
                  classify=None,
                  image_view_width=1280):
@@ -128,6 +129,7 @@ class Mosaic():
         self.c_params = C
         self.camera_settings = camera_settings
         self.image_settings = image_settings
+        self.email_settings = email_settings
         self.start_menu = start_menu
         self.classify = classify
         self.has_started = not start_menu
@@ -298,7 +300,8 @@ class Mosaic():
                 MPMenuItem('Brightness -\tCtrl+Shift+B', 'Decrease Brightness', 'decreaseBrightness'),
                 MPMenuItem('Refresh Image\tCtrl+R', 'Refresh Image', 'refreshImage'),
                 MPMenuItem('Download Full\tCtrl+D', 'Download Full', 'downloadFull'),
-                MPMenuItem('Place Marker\tCtrl+M', 'Place Marker', 'placeMarker')])
+                MPMenuItem('Place Marker\tCtrl+M', 'Place Marker', 'placeMarker'),
+                MPMenuItem('Send Mail\tCtrl+S', 'Send Mail', 'sendMail')])
             self.view_menu = MPMenuTop([vmenu])
             self.view_image.set_menu(self.view_menu)
             self.view_image.set_popup_menu(vmenu)
@@ -607,7 +610,19 @@ class Mosaic():
                                                         layer='Markers',
                                                         img=icon,
                                                         follow=False))
-                
+        elif event.returnkey == 'sendMail':
+            if self.email_settings is None or not self.email_settings.SmtpServer or not self.email_settings.MailFormat:
+                return
+            if self.current_view >= len(self.images):
+                return
+            if self.last_view_latlon is None:
+                print("Please left click first")
+                return
+            image = self.images[self.current_view]
+            latlon = self.last_view_latlon
+            if latlon == None:
+                return
+            cuav_util.send_mail(self.email_settings, image, latlon)
 
     def pos_to_region(self, pos):
         '''work out region for a clicked position on the mosaic'''
