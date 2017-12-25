@@ -162,7 +162,14 @@ def process(args):
       MPSetting('SaveIntermediate', bool, args.debug)
       ],
     title='Image Settings')
-  
+
+  email_settings = MPSettings(
+    [ MPSetting('SmtpServer', str, args.smtp_server, 'STMP Server Info'),
+      MPSetting('MailFormat', str, args.mail_format, 'Mail format')
+      ],
+    title='Email Settings'
+  )
+
   mosaic = cuav_mosaic.Mosaic(slipmap, C=C_params,
                               camera_settings=camera_settings,
                               image_settings=image_settings,
